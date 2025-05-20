@@ -32,9 +32,9 @@ static size_t g_page_size;             /* System page size, cached */
 #define GET_BLOCK_SIZE(bp) ((bp)->size & ~1UL) /* Excludes the LSB (alloc bit) */
 #define IS_ALLOCATED(bp) ((bp)->size & 1UL)
 /* Set block as allocated (preserve size, set LSB) */
-#define SET_ALLOCATED(bp) ((bp)->size = (GET_BLOCK_SIZE(bp) | 1UL)))
+#define SET_ALLOCATED(bp) ((bp)->size = (GET_BLOCK_SIZE(bp) | 1UL))
 /* Set block as free (preserve size, clear LSB) */
-#define SET_FREE(bp) ((bp)->size = (GET_BLOCK_SIZE(bp) & ~1UL)))
+#define SET_FREE(bp) ((bp)->size = (GET_BLOCK_SIZE(bp) & ~1UL))
 /* Pack size and allocation status into a header value */
 #define PACK(size, alloc) ((size) | (alloc))
 
