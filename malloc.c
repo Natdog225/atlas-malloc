@@ -19,17 +19,19 @@ static size_t g_page_size;             /* System page size, cached */
 #define HEADER_ACTUAL_SIZE (ALIGN_SIZE(sizeof(block_header_t)))
 
 /* Minimum size of any block when it's free (to hold free list pointers) */
-#define MIN_FREE_BLOCK_PAYLOAD_SIZE (ALIGN_SIZE(sizeof(free_block_t)) - HEADER_ACTUAL_SIZE)
+#define MIN_FREE_BLOCK_PAYLOAD_SIZE \
+(ALIGN_SIZE(sizeof(free_block_t)) - HEADER_ACTUAL_SIZE)
 #define MIN_FREE_BLOCK_TOTAL_SIZE (ALIGN_SIZE(sizeof(free_block_t)))
 
 
 /* Get payload pointer from block pointer (bp) */
 #define BLOCK_TO_PAYLOAD(bp) ((void *)((char *)(bp) + HEADER_ACTUAL_SIZE))
 /* Get block pointer from payload pointer (ptr) */
-#define PAYLOAD_TO_BLOCK(ptr) ((block_header_t *)((char *)(ptr) - HEADER_ACTUAL_SIZE))
+#define PAYLOAD_TO_BLOCK(ptr) \
+((block_header_t *)((char *)(ptr) - HEADER_ACTUAL_SIZE))
 
 /* Macros to manipulate the size and allocation bit in the header */
-#define GET_BLOCK_SIZE(bp) ((bp)->size & ~1UL) /* Excludes the LSB (alloc bit) */
+#define GET_BLOCK_SIZE(bp) ((bp)->size & ~1UL)
 #define IS_ALLOCATED(bp) ((bp)->size & 1UL)
 /* Set block as allocated (preserve size, set LSB) */
 #define SET_ALLOCATED(bp) ((bp)->size = (GET_BLOCK_SIZE(bp) | 1UL))
@@ -151,7 +153,7 @@ static free_block_t *extend_heap(size_t min_size)
 
 /**
  * find_free_block - Searches the free list for a suitable block.
- * @required_total_size: The minimum total block size needed (header + payload).
+ * @required_total_size: The minimum total block size needed.
  *
  * Description: Implements a first-fit search strategy on the free list.
  *
@@ -234,7 +236,8 @@ void *_malloc(size_t size)
 		add_to_free_list(remainder_block);
 	}
 	else
-	{ /* Use the whole block, not enough space to split meaningfully, like a bad breakup */
+	{ /* Use the whole block, not enough space to split meaningfully,
+	* like a bad breakup */
 		alloc_block_header->size = PACK(original_block_size, 1);
 	}
 
