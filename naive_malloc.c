@@ -1,57 +1,79 @@
 #include "malloc.h"
 
+/* global variables to manage the heap */
+static char *g_naive_heap_current_ptr; /* Points to the next free spot */
+static size_t g_naive_remaining_in_chunk; /* Remaining bytes in the current sbrk'd chunk */
+static size_t g_naive_page_size; /* Cached system page size */
+
 /**
- * naive_malloc - A naive memory allocator.
- * @size: The number of bytes to allocate.
+ * naive_malloc - A naive memory allocator that manages a simple heap.
+ * @size: The number of bytes to allocate for the user.
  *
  * Description: This function allocates 'size' bytes of memory.
- * It ensures that the memory allocated from the system via sbrk()
- * is a multiple of the page size.
+ * It attempts to serve allocations from a previously sbrk'd memory chunk.
+ * If the current chunk is NULL or too small, it requests a new chunk
+
  *
  * Return: On success, a pointer to the allocated memory.
  * On failure (e.g., if size is 0 or sbrk fails), returns NULL.
  */
 void *naive_malloc(size_t size)
 {
-	static size_t page_size; /* Cache page size */
-	void *block_start;
+	void *current_block_start_addr;
 	void *user_data_ptr;
 	size_t actual_header_size;
-	size_t total_payload_plus_header;
-	size_t sbrk_alloc_size;
-	size_t num_pages;
+	size_t total_space_needed_for_block;
 	size_t *header_ptr;
 
 	if (size == 0)
 		return (NULL);
 
-	if (page_size == 0) /* Initialize page_size on first call */
-		page_size = (size_t)getpagesize();
+	/* Initialize page_size on first call */
+	if (g_naive_page_size == 0)
+		g_naive_page_size = (size_t)getpagesize();
 
-	/* The header is exactly sizeof(size_t) */
 	actual_header_size = sizeof(size_t);
+	total_space_needed_for_block = actual_header_size + size;
 
-	total_payload_plus_header = actual_header_size + size;
+	/* Check if we need to request more memory from the OS */
+	if (g_naive_heap_current_ptr == NULL ||
+	    total_space_needed_for_block > g_naive_remaining_in_chunk)
+	{
+		size_t num_pages_to_request;
+		size_t sbrk_alloc_amount;
+		void *new_chunk_start;
 
-	/*
-	 * Calculate sbrk allocation size.
-	 * Must be a multiple of page_size to allocate memory pages only.
-	 */
-	num_pages = (total_payload_plus_header + page_size - 1) / page_size;
-	sbrk_alloc_size = num_pages * page_size;
+		/* Determine how many pages to request */
+		/* Request at least enough for current block, or at least one page */
+		if (total_space_needed_for_block > g_naive_page_size)
+			num_pages_to_request = (total_space_needed_for_block +
+				g_naive_page_size - 1) / g_naive_page_size;
+		else
+			num_pages_to_request = 1;
 
-	/* Request memory from the OS */
-	block_start = sbrk(sbrk_alloc_size);
-	if (block_start == (void *)-1) /* sbrk failed */
-		return (NULL);
+		sbrk_alloc_amount = num_pages_to_request * g_naive_page_size;
 
-	/*
-	 * Store the original requested size in the header.
-	 */
-	header_ptr = (size_t *)block_start;
-	*header_ptr = size; /* Store the user's requested size */
+		new_chunk_start = sbrk(sbrk_alloc_amount);
+		if (new_chunk_start == (void *)-1) /* sbrk failed */
+			return (NULL);
 
-	user_data_ptr = (char *)block_start + actual_header_size;
+		g_naive_heap_current_ptr = (char *)new_chunk_start;
+		g_naive_remaining_in_chunk = sbrk_alloc_amount;
+	}
+
+	/* Allocate from the current chunk */
+	current_block_start_addr = (void *)g_naive_heap_current_ptr;
+
+	/* Store the original requested size in the header */
+	header_ptr = (size_t *)current_block_start_addr;
+	*header_ptr = size;
+
+	/* User data pointer starts immediately after the header */
+	user_data_ptr = (char *)current_block_start_addr + actual_header_size;
+
+	/* Update global heap trackers */
+	g_naive_heap_current_ptr += total_space_needed_for_block;
+	g_naive_remaining_in_chunk -= total_space_needed_for_block;
 
 	return (user_data_ptr);
 }
