@@ -237,7 +237,8 @@ void *_malloc(size_t size)
 	}
 	else
 	{ /* Use the whole block, not enough space to split meaningfully,
-	* like a bad breakup */
+	* like a bad breakup
+	*/
 		alloc_block_header->size = PACK(original_block_size, 1);
 	}
 
@@ -266,6 +267,6 @@ void _free(void *ptr)
 
 	cast_to_free_block = (free_block_t *)block_header_to_free;
 
-	/* TODO: Implement coalescing with adjacent (next/prev physical) free blocks */
+	/* TODO: Implement coalescing with adjacent (next/prev physical) */
 	add_to_free_list(cast_to_free_block);
 }
