@@ -97,7 +97,7 @@ void _free(void *ptr)
 	if ((void *)next_header < heap_current_break &&
 	    !IS_ALLOCATED(next_header))
 	{
-		remove_from_free_list((free_block_t *)next_header); /* Helper in this file */
+		remove_from_free_list((free_block_t *)next_header); /* Helper */
 		current_header->size += GET_BLOCK_SIZE(next_header);
 		/* current_header is already marked as free, its size is now larger */
 	}
