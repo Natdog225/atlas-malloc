@@ -47,7 +47,7 @@ static free_block_t *extend_heap(size_t min_size)
 
 /**
  * find_free_block - Searches the free list for a suitable block.
- * @required_total_size: The minimum total block size needed (header + payload).
+ * @required_total_size: The minimum total block size needed.
  *
  * Description: Implements a first-fit search strategy on the free list.
  *

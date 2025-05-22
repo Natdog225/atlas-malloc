@@ -23,7 +23,8 @@
  * - 1 if the block is allocated.
  * - 0 if the block is free.
  */
-typedef struct block_header {
+typedef struct block_header 
+{
 	size_t size;
 } block_header_t;
 
@@ -33,7 +34,8 @@ typedef struct block_header {
  * @next_free: Pointer to the next free block in the explicit free list.
  * @prev_free: Pointer to the previous free block in the explicit free list.
  */
-typedef struct free_block {
+typedef struct free_block 
+{
 	block_header_t header;
 	struct free_block *next_free;
 	struct free_block *prev_free;
@@ -43,11 +45,13 @@ typedef struct free_block {
 
 #define ALIGN_SIZE(s) (((s) + ALIGNMENT - 1) & ~(ALIGNMENT - 1))
 #define HEADER_ACTUAL_SIZE (ALIGN_SIZE(sizeof(block_header_t)))
-#define MIN_FREE_BLOCK_PAYLOAD_SIZE (ALIGN_SIZE(sizeof(free_block_t)) - HEADER_ACTUAL_SIZE)
+#define MIN_FREE_BLOCK_PAYLOAD_SIZE \
+(ALIGN_SIZE(sizeof(free_block_t)) - HEADER_ACTUAL_SIZE)
 #define MIN_FREE_BLOCK_TOTAL_SIZE (ALIGN_SIZE(sizeof(free_block_t)))
 
 #define BLOCK_TO_PAYLOAD(bp) ((void *)((char *)(bp) + HEADER_ACTUAL_SIZE))
-#define PAYLOAD_TO_BLOCK(ptr) ((block_header_t *)((char *)(ptr) - HEADER_ACTUAL_SIZE))
+#define PAYLOAD_TO_BLOCK(ptr) \
+((block_header_t *)((char *)(ptr) - HEADER_ACTUAL_SIZE))
 
 #define GET_BLOCK_SIZE(bp) ((bp)->size & ~1UL)
 #define IS_ALLOCATED(bp) ((bp)->size & 1UL)
