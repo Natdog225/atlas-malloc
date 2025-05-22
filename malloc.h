@@ -23,7 +23,7 @@
  * - 1 if the block is allocated.
  * - 0 if the block is free.
  */
-typedef struct block_header 
+typedef struct block_header
 {
 	size_t size;
 } block_header_t;
@@ -34,7 +34,7 @@ typedef struct block_header
  * @next_free: Pointer to the next free block in the explicit free list.
  * @prev_free: Pointer to the previous free block in the explicit free list.
  */
-typedef struct free_block 
+typedef struct free_block
 {
 	block_header_t header;
 	struct free_block *next_free;
